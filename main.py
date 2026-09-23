@@ -5,7 +5,18 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-db_url = os.getenv("DATABASE_URL")
+db_url = os.getenv("DB_URL")
+if db_url is None:
+    raise RuntimeError("DB_URL is not set")
+
+db_user = os.getenv("DB_USER")
+db_password = os.getenv("DB_PASSWORD")
+weather_api_key = os.getenv("WEATHER_API_KEY")
+weather_api_url = os.getenv("WEATHER_API_BASE_URL")
+geo_api_url = os.getenv("GEO_API_URL")
+geo_api_fallback_city = os.getenv("GEO_API_FALLBACK_CITY")
+env = os.getenv("ENVIRONMENT")
+output_file = os.getenv("OUTPUT_FILE")
 
 engine = create_engine(db_url, echo=True)
 
