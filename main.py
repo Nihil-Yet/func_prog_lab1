@@ -1,8 +1,30 @@
-from db_manager import Weather, session
+from db_manager import Weather, save_forecast, session
 from env_manager import OUTPUT_FILE
-from geoloc import get_location
+from geoloc import Location, get_location
 from report import write_markdown
 from weather_api import aggregate_daily, fetch_forecast
+
+
+def print_summary(
+    loc: Location,
+    period_start,
+    period_end,
+    saved_count: int,
+    output_path: str,
+) -> None:
+    sep = "=" * 50
+    if loc.lat is not None and loc.lon is not None:
+        coords = f"{loc.lat:.4f}, {loc.lon:.4f}"
+    else:
+        coords = "не определены"
+
+    print(sep)
+    print(f"  Город:            {loc.city}")
+    print(f"  Координаты:       {coords}")
+    print(f"  Период прогноза:  {period_start} – {period_end}")
+    print(f"  Сохранено записей: {saved_count}")
+    print(f"  Файл отчёта:      {output_path}")
+    print(sep)
 
 
 def main() -> int:
@@ -10,25 +32,21 @@ def main() -> int:
     raw = fetch_forecast(loc)
     daily = aggregate_daily(raw, days=4)
 
-    session.query(Weather).filter(Weather.city == loc.city).delete()
+    saved = save_forecast(loc.city, daily)
 
-    saved = []
-    for row in daily:
-        w = Weather(
-            city=loc.city,
-            forecast_date=row["date"],
-            temp_min=row["temp_min"],
-            temp_max=row["temp_max"],
-            humidity=row["humidity"],
-            wind_speed=row["wind_speed"],
-            description=row["description"],
-        )
-        session.add(w)
-        saved.append(w)
+    all_rows = (
+        session.query(Weather)
+        .filter(Weather.city == loc.city)
+        .order_by(Weather.forecast_date)
+        .all()
+    )
 
-    session.commit()
-    write_markdown(loc.city, saved)
-    print(f"Готово: {len(saved)} записей → {OUTPUT_FILE}")
+    write_markdown(loc.city, all_rows)
+
+    period_start = all_rows[0].forecast_date if all_rows else "—"
+    period_end = all_rows[-1].forecast_date if all_rows else "—"
+    print_summary(loc, period_start, period_end, len(saved), OUTPUT_FILE)
+
     return 0
 
 
