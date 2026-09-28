@@ -1,8 +1,11 @@
+import logging
 from dataclasses import dataclass
 
 import requests
 
-from env_manager import GEO_API_FALLBACK_CITY, GEO_API_URL, log
+from env_manager import GEO_API_FALLBACK_CITY, GEO_API_URL
+
+log = logging.getLogger(__name__)
 
 
 @dataclass
@@ -19,8 +22,14 @@ def get_location() -> Location:
             r.raise_for_status()
             data = r.json()
             city = data.get("city")
+
             lat = data.get("lat")
             lon = data.get("lon")
+            if lat is None:
+                lat = data.get("latitude")
+            if lon is None:
+                lon = data.get("longitude")
+
             if city and lat is not None and lon is not None:
                 log.info("Локация по IP: %s (%.4f, %.4f)", city, lat, lon)
                 return Location(city, float(lat), float(lon))

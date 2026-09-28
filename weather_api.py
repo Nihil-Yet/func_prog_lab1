@@ -1,10 +1,13 @@
+import logging
 from collections import defaultdict
 from datetime import date, datetime, timezone
 
 import requests
 
-from env_manager import WEATHER_API_KEY, WEATHER_API_URL, log
+from env_manager import WEATHER_API_KEY, WEATHER_API_URL
 from geoloc import Location
+
+log = logging.getLogger(__name__)
 
 
 def fetch_forecast(loc: Location) -> list[dict]:
@@ -23,7 +26,25 @@ def fetch_forecast(loc: Location) -> list[dict]:
         log.info("Прогноз по имени города: %s", loc.city)
 
     r = requests.get(f"{WEATHER_API_URL}/forecast", params=params, timeout=10)
-    r.raise_for_status()
+    try:
+        r = requests.get(
+            f"{WEATHER_API_URL}/forecast",
+            params=params,
+            timeout=10,
+        )
+
+        if r.status_code == 404:
+            log.critical("Город не найден: %s", loc.city)
+            raise RuntimeError(f"Город не найден: {loc.city}")
+
+        r.raise_for_status()
+
+        return r.json()["list"]
+
+    except requests.RequestException as e:
+        log.critical("Ошибка при запросе прогноза: %s", e)
+        raise
+
     return r.json()["list"]
 
 
