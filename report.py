@@ -42,8 +42,8 @@ def _render(city: str, rows: list) -> str:
 
     out = [
         "# Прогноз погоды",
-        f"Автоматически определённая локация: {city}  ",
-        f"Период: {period}  ",
+        f"Автоматически определённая локация: {city}",
+        f"Период: {period}",
         "",
         line(HEADERS),
         separator,

@@ -54,7 +54,7 @@ def aggregate_daily(items: list[dict], days: int = 4) -> list[dict]:
                 "temp_min": min(temps_min),
                 "temp_max": max(temps_max),
                 "humidity": int(sum(humidity) / len(humidity)),
-                "wind_speed": sum(wind) / len(wind),
+                "wind_speed": max(wind),
                 "description": max(set(descriptions), key=descriptions.count),
             }
         )
