@@ -28,4 +28,4 @@ if [ -f "$REQ_FILE" ]; then
     fi
 fi
 
-exec python ./main.py
+exec python **/main.py
