@@ -19,51 +19,13 @@
 \usepackage{amsmath}
 \usepackage{xcolor}
 
-% ======================= listings: настройка =======================
-\lstset{
-    basicstyle=\ttfamily\footnotesize,
-    breaklines=true,
-    frame=single,
-    numbers=left,
-    numberstyle=\tiny,
-    showstringspaces=false,
-    captionpos=b,
-    extendedchars=true,
-    inputencoding=utf8,
-    language=Python,
-    keywordstyle=\color{blue},
-    commentstyle=\color{green!60!black},
-    stringstyle=\color{red!70!black},
-    tabsize=4,
-    columns=flexible,
-    literate=
-    {а}{{\cyra}}1 {б}{{\cyrb}}1 {в}{{\cyrv}}1 {г}{{\cyrg}}1
-    {д}{{\cyrd}}1 {е}{{\cyre}}1 {ё}{{\cyryo}}1 {ж}{{\cyrzh}}1
-    {з}{{\cyrz}}1 {и}{{\cyri}}1 {й}{{\cyrishrt}}1 {к}{{\cyrk}}1
-    {л}{{\cyrl}}1 {м}{{\cyrm}}1 {н}{{\cyrn}}1 {о}{{\cyro}}1
-    {п}{{\cyrp}}1 {р}{{\cyrr}}1 {с}{{\cyrs}}1 {т}{{\cyrt}}1
-    {у}{{\cyru}}1 {ф}{{\cyrf}}1 {х}{{\cyrh}}1 {ц}{{\cyrc}}1
-    {ч}{{\cyrch}}1 {ш}{{\cyrsh}}1 {щ}{{\cyrshch}}1 {ъ}{{\cyrhrdsn}}1
-    {ы}{{\cyrery}}1 {ь}{{\cyrsftsn}}1 {э}{{\cyrerev}}1 {ю}{{\cyryu}}1
-    {я}{{\cyrya}}1
-    {А}{{\CYRA}}1 {Б}{{\CYRB}}1 {В}{{\CYRV}}1 {Г}{{\CYRG}}1
-    {Д}{{\CYRD}}1 {Е}{{\CYRE}}1 {Ё}{{\CYRYO}}1 {Ж}{{\CYRZH}}1
-    {З}{{\CYRZ}}1 {И}{{\CYRI}}1 {Й}{{\CYRISHRT}}1 {К}{{\CYRK}}1
-    {Л}{{\CYRL}}1 {М}{{\CYRM}}1 {Н}{{\CYRN}}1 {О}{{\CYRO}}1
-    {П}{{\CYRP}}1 {Р}{{\CYRR}}1 {С}{{\CYRS}}1 {Т}{{\CYRT}}1
-    {У}{{\CYRU}}1 {Ф}{{\CYRF}}1 {Х}{{\CYRH}}1 {Ц}{{\CYRC}}1
-    {Ч}{{\CYRCH}}1 {Ш}{{\CYRSH}}1 {Щ}{{\CYRSHCH}}1 {Ъ}{{\CYRHRDSN}}1
-    {Ы}{{\CYRERY}}1 {Ь}{{\CYRSFTSN}}1 {Э}{{\CYREREV}}1 {Ю}{{\CYRYU}}1
-    {Я}{{\CYRYA}}1
-}
-
 \newcounter{imgcnt}
 \setcounter{imgcnt}{1}
 \newcounter{codecnt}
 \setcounter{codecnt}{1}
 
 \begin{document}
-\sloppy                            % <-- убирает Overfull \hbox
+\sloppy
 \emergencystretch=1em
 \setlength{\footskip}{10mm}
 
@@ -90,9 +52,9 @@
 \end{center}
 \vspace{45mm}
 \begin{flushleft}
-Выполнил студент гр. ИВТб-3302-05-00 \hspace{42mm} \rule[-0,5mm]{30mm}{0.15mm}\,/Иванов И.И./\\
+Выполнил студент гр. ИВТб-3302-05-00 \hspace{42mm} \rule[-0,5mm]{30mm}{0.15mm}\,/Белозеров Р.Д./\\
 \mbox{\tiny\hspace{124mm}(Подпись)}\\[1ex]
-Проверил профессор кафедры ЭВМ \hspace{45mm} \rule[-0,5mm]{30mm}{0.15mm}\,/Петров П.П./\\
+Преподаватель  \hspace{45mm} \rule[-0,5mm]{30mm}{0.15mm}\,/Роман Алексеевич/\\
 \mbox{\tiny\hspace{122mm}(Подпись)}
 \end{flushleft}
 \vfill
@@ -130,7 +92,7 @@
     \item \textbf{requests} --- библиотека для выполнения HTTP-запросов к внешним API.
     \item \textbf{python-dotenv} --- загрузка переменных окружения из файла \texttt{.env}.
     \item \textbf{OpenWeatherMap API} --- внешний сервис для получения прогноза погоды. Используется endpoint \texttt{/data/2.5/forecast}, возвращающий данные с шагом 3 часа.
-    \item \textbf{IP-геолокация} --- сервис \texttt{ip-api.com} для определения города и координат по IP-адресу.
+    \item \textbf{IP-геолокация} --- сервис для определения города и координат по IP-адресу (проверялся только http://ip-api.com/json/).
     \item \textbf{Markdown} --- текстовый формат для формирования отчёта.
 \end{itemize}
 
@@ -148,213 +110,7 @@
     \item \texttt{main.py} --- точка входа, управляющая последовательностью вызовов.
 \end{itemize}
 
-Взаимодействие модулей можно описать следующей схемой:
-\begin{center}
-\texttt{main} $\rightarrow$ \texttt{geoloc} $\rightarrow$ \texttt{weather\_api} $\rightarrow$ \texttt{db\_manager} $\rightarrow$ \texttt{report}
-\end{center}
-
-\subsection*{Модуль env\_manager.py}
-
-Модуль загружает переменные из \texttt{.env} с помощью \texttt{python-dotenv} и предоставляет их остальным частям программы. Обязательные переменные проверяются функцией \texttt{\_require}. Также настраивается базовое логирование.
-
-\begin{lstlisting}[caption={Фрагмент env\_manager.py}, label={lst:env}]
-import logging
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
-LEVEL = os.getenv("LOG_LEVEL", "WARNING").upper()
-logging.basicConfig(level=LEVEL,
-                    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
-log = logging.getLogger(__name__)
-
-def _require(name: str) -> str:
-    v = os.getenv(name)
-    if v is None:
-        raise RuntimeError(f"{name} is not set")
-    return v
-
-DB_URL: str = _require("DB_URL")
-DB_USER: str = os.getenv("DB_USER", "")
-DB_PASSWORD: str = os.getenv("DB_PASSWORD", "")
-WEATHER_API_KEY: str = _require("WEATHER_API_KEY")
-WEATHER_API_URL: str = _require("WEATHER_API_BASE_URL")
-GEO_API_URL: str | None = os.getenv("GEO_API_URL")
-GEO_API_FALLBACK_CITY: str | None = os.getenv("GEO_API_FALLBACK_CITY")
-OUTPUT_FILE: str = os.getenv("OUTPUT_FILE", "weather_report.md")
-\end{lstlisting}
-
-\subsection*{Модуль geoloc.py}
-
-Определяет локацию пользователя. Если задан \texttt{GEO\_API\_URL}, выполняется запрос к сервису IP-геолокации. При успехе возвращается объект \texttt{Location} с городом и координатами. В случае ошибки или отсутствия URL используется запасной город из \texttt{GEO\_API\_FALLBACK\_CITY}.
-
-\begin{lstlisting}[caption={Функция get\_location в geoloc.py}, label={lst:geo}]
-@dataclass
-class Location:
-    city: str
-    lat: float | None = None
-    lon: float | None = None
-
-def get_location() -> Location:
-    if GEO_API_URL:
-        try:
-            r = requests.get(GEO_API_URL, timeout=5)
-            r.raise_for_status()
-            data = r.json()
-            city = data.get("city")
-            lat = data.get("lat") or data.get("latitude")
-            lon = data.get("lon") or data.get("longitude")
-            if city and lat is not None and lon is not None:
-                return Location(city, float(lat), float(lon))
-        except requests.RequestException as e:
-            log.warning("Request to %s failed: %s", GEO_API_URL, e)
-        except ValueError as e:
-            log.warning("JSON parse error: %s", e)
-    if GEO_API_FALLBACK_CITY:
-        return Location(GEO_API_FALLBACK_CITY)
-    raise RuntimeError("Could not determine city.")
-\end{lstlisting}
-
-\subsection*{Модуль weather\_api.py}
-
-Содержит две основные функции: \texttt{fetch\_forecast} для запроса к OpenWeatherMap и \texttt{aggregate\_daily} для агрегации 3-часовых данных в дневные.
-
-\begin{lstlisting}[caption={Функции fetch\_forecast и aggregate\_daily}, label={lst:weather}]
-def fetch_forecast(loc: Location) -> list[dict]:
-    params = {"appid": WEATHER_API_KEY, "units": "metric", "lang": "ru"}
-    if loc.lat is not None and loc.lon is not None:
-        params["lat"] = loc.lat
-        params["lon"] = loc.lon
-    else:
-        params["q"] = loc.city
-    r = requests.get(f"{WEATHER_API_URL}/forecast", params=params, timeout=10)
-    if r.status_code == 404:
-        raise RuntimeError(f"City not found: {loc.city}")
-    r.raise_for_status()
-    return r.json()["list"]
-
-def aggregate_daily(items: list[dict], days: int = 4) -> list[dict]:
-    by_day = defaultdict(list)
-    for item in items:
-        d = datetime.fromisoformat(item["dt_txt"]).date()
-        by_day[d].append(item)
-    today = datetime.now(tz=timezone.utc).date()
-    result = []
-    for d in sorted(by_day):
-        if d < today:
-            continue
-        if len(result) >= days:
-            break
-        entries = by_day[d]
-        temps_min = [e["main"]["temp_min"] for e in entries]
-        temps_max = [e["main"]["temp_max"] for e in entries]
-        humidity = [e["main"]["humidity"] for e in entries]
-        wind = [e["wind"]["speed"] for e in entries]
-        descriptions = [e["weather"][0]["description"] for e in entries]
-        result.append({
-            "date": d,
-            "temp_min": min(temps_min),
-            "temp_max": max(temps_max),
-            "humidity": int(sum(humidity) / len(humidity)),
-            "wind_speed": max(wind),
-            "description": max(set(descriptions), key=descriptions.count),
-        })
-    return result
-\end{lstlisting}
-
-\subsection*{Модуль db\_manager.py}
-
-Отвечает за подключение к базе данных, описание модели \texttt{Weather} и сохранение записей. Используется уникальное ограничение по паре \texttt{(city, forecast\_date)}, чтобы избежать дублирования.
-
-\begin{lstlisting}[caption={Модель Weather и функция save\_forecast}, label={lst:db}]
-class Weather(Base):
-    __tablename__ = "weather_forecast"
-    __table_args__ = (
-        UniqueConstraint("city", "forecast_date", name="uq_city_forecast_date"),
-    )
-    id = Column(Integer, primary_key=True)
-    city = Column(String(100), nullable=False)
-    forecast_date = Column(Date, nullable=False)
-    temp_min = Column(Float)
-    temp_max = Column(Float)
-    humidity = Column(Integer)
-    wind_speed = Column(Float)
-    description = Column(String(100))
-    created_at = Column(DateTime)
-
-def save_forecast(city: str, rows: list[dict]) -> list[Weather]:
-    existing = {d for (d,) in session.query(Weather.forecast_date)
-                .filter(Weather.city == city).all()}
-    saved = []
-    for row in rows:
-        if row["date"] in existing:
-            continue
-        w = Weather(city=city, forecast_date=row["date"],
-                    temp_min=row["temp_min"], temp_max=row["temp_max"],
-                    humidity=row["humidity"], wind_speed=row["wind_speed"],
-                    description=row["description"],
-                    created_at=datetime.now(tz=timezone.utc))
-        session.add(w)
-        saved.append(w)
-    session.commit()
-    return saved
-\end{lstlisting}
-
-\subsection*{Модуль report.py}
-
-Формирует Markdown-отчёт с выравниванием колонок. Функция \texttt{\_render} создаёт таблицу, а \texttt{write\_markdown} записывает её в файл.
-
-\begin{lstlisting}[caption={Функция \_render в report.py}, label={lst:report}]
-HEADERS = ["Date", "Min T (C)", "Max T (C)", "Description", "Humidity (%)", "Wind (m/s)"]
-
-def _row_from(r) -> list[str]:
-    return [str(r.forecast_date), str(round(r.temp_min)), str(round(r.temp_max)),
-            r.description.capitalize(), str(r.humidity), str(round(r.wind_speed))]
-
-def _render(city: str, rows: list) -> str:
-    if not rows:
-        return f"# Weather forecast\n\nLocation: {city}\n\nNo data.\n"
-    body = [_row_from(r) for r in rows]
-    widths = [len(h) for h in HEADERS]
-    for row in body:
-        for i, cell in enumerate(row):
-            widths[i] = max(widths[i], len(cell))
-    def line(cells):
-        return "| " + " | ".join(c.ljust(widths[i])
-                                 for i, c in enumerate(cells)) + " |"
-    separator = "|" + "|".join("-" * (w + 2) for w in widths) + "|"
-    period = f"{rows[0].forecast_date} - {rows[-1].forecast_date}"
-    out = ["# Weather forecast", f"Location: {city}",
-           f"Period: {period}", "", line(HEADERS), separator]
-    out.extend(line(row) for row in body)
-    return "\n".join(out) + "\n"
-\end{lstlisting}
-
-\subsection*{Главный модуль main.py}
-
-Управляет последовательностью действий: определение локации, запрос прогноза, агрегация, сохранение, выборка из БД, формирование отчёта и вывод сводки.
-
-\begin{lstlisting}[caption={Функция main в main.py}, label={lst:main}]
-def main() -> int:
-    loc = get_location()
-    raw = fetch_forecast(loc)
-    daily = aggregate_daily(raw, days=4)
-    saved = save_forecast(loc.city, daily)
-    today = datetime.now(tz=timezone.utc).date()
-    period_end = today + timedelta(days=3)
-    all_rows = session.query(Weather).filter(
-        Weather.city == loc.city,
-        Weather.forecast_date >= today,
-        Weather.forecast_date <= period_end
-    ).order_by(Weather.forecast_date).all()
-    write_markdown(loc.city, all_rows)
-    period_start = all_rows[0].forecast_date if all_rows else "-"
-    actual_period_end = all_rows[-1].forecast_date if all_rows else "-"
-    print_summary(loc, period_start, actual_period_end, len(saved), OUTPUT_FILE)
-    return 0
-\end{lstlisting}
-
+\newpage
 \subsection*{Настройка и запуск}
 
 Для работы приложения необходимо создать файл \texttt{.env} на основе \texttt{.env.example} и заполнить его. Основные переменные приведены в таблице~\ref{tab:env}.
@@ -365,6 +121,7 @@ def main() -> int:
 \caption*{Таблица 1}
 \captionsetup{justification=centering,singlelinecheck=false}
 \caption*{Переменные окружения}
+\refstepcounter{table}%
 \label{tab:env}
 \renewcommand{\arraystretch}{1.12}
 \begin{tabular}{|>{\ttfamily}p{0.35\textwidth}|>{\raggedright\arraybackslash}p{0.55\textwidth}|}
@@ -401,30 +158,34 @@ OUTPUT\_FILE & Путь к Markdown-файлу отчёта\\
 
 Запуск производится командой \texttt{python src/main.py} или через скрипт \texttt{run.sh}.
 
+\newpage
 \subsection*{Пример вывода}
 
 Пример Markdown-отчёта:
-\begin{verbatim}
-# Weather forecast
-Location: Kirov
-Period: 2026-09-28 - 2026-10-01
+\begin{figure}[!ht]
+\centering
+\begin{Verbatim}[fontsize=\fontsize{9}{7}\selectfont]
+# Прогноз погоды
+Автоматически определённая локация: Frankfurt am Main
+Период: 2026-09-29 – 2026-10-02
 
-| Date       | Min T (C) | Max T (C) | Description | Humidity (%) | Wind (m/s) |
-|------------|-----------|-----------|-------------|--------------|------------|
-| 2026-09-28 | 8         | 9         | Clear       | 91           | 2          |
-| 2026-09-29 | 5         | 16        | Clear       | 77           | 3          |
-| 2026-09-30 | 4         | 16        | Clear       | 78           | 2          |
-| 2026-10-01 | 6         | 15        | Cloudy      | 77           | 3          |
-\end{verbatim}
+| Дата       | Мин. темп. (°C) | Макс. темп. (°C) | Описание              | Влажность (%) | Ветер (м/с) |
+|------------|-----------------|------------------|-----------------------|---------------|-------------|
+| 2026-09-29 | 16              | 28               | Пасмурно              | 61            | 3           |
+| 2026-09-30 | 14              | 25               | Переменная облачность | 63            | 2           |
+| 2026-10-01 | 15              | 19               | Небольшой дождь       | 85            | 2           |
+| 2026-10-02 | 14              | 21               | Пасмурно              | 78            | 3           |
+\end{Verbatim}
+\end{figure}
 
 Пример консольной сводки:
 \begin{verbatim}
 ==================================================
-  City:              Frankfurt am Main
-  Coordinates:       50.0827, 8.6297
-  Forecast period:   2026-09-28 - 2026-10-01
-  Saved records:     0
-  Report file:       weather_report.md
+  Город:            Frankfurt am Main
+  Координаты:       50.0827, 8.6297
+  Период прогноза:  2026-09-29 – 2026-10-02
+  Сохранено записей: 0
+  Файл отчёта:      weather_report.md
 ==================================================
 \end{verbatim}
 
