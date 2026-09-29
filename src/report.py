@@ -25,8 +25,8 @@ def _render(city: str, rows: list) -> str:
     if not rows:
         return f"# Прогноз погоды\n\nЛокация: {city}\n\nНет данных.\n"
 
-    rows_sorted = sorted(rows, key=lambda r: r.forecast_date)
-    body = [_row_from(r) for r in rows_sorted]
+    # rows_sorted = sorted(rows, key=lambda r: r.forecast_date)
+    body = [_row_from(r) for r in rows]
 
     widths = [len(h) for h in HEADERS]
     for row in body:
@@ -38,7 +38,7 @@ def _render(city: str, rows: list) -> str:
 
     separator = "|" + "|".join("-" * (w + 2) for w in widths) + "|"
 
-    period = f"{rows_sorted[0].forecast_date} – {rows_sorted[-1].forecast_date}"
+    period = f"{rows[0].forecast_date} – {rows[-1].forecast_date}"
 
     out = [
         "# Прогноз погоды",
