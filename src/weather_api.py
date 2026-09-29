@@ -25,7 +25,6 @@ def fetch_forecast(loc: Location) -> list[dict]:
         params["q"] = loc.city
         log.info("Прогноз по имени города: %s", loc.city)
 
-    r = requests.get(f"{WEATHER_API_URL}/forecast", params=params, timeout=10)
     try:
         r = requests.get(
             f"{WEATHER_API_URL}/forecast",
@@ -44,8 +43,6 @@ def fetch_forecast(loc: Location) -> list[dict]:
     except requests.RequestException as e:
         log.critical("Ошибка при запросе прогноза: %s", e)
         raise
-
-    return r.json()["list"]
 
 
 def aggregate_daily(items: list[dict], days: int = 4) -> list[dict]:

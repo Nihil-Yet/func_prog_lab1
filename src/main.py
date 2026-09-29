@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta, timezone
+
 from db_manager import Weather, save_forecast, session
 from env_manager import OUTPUT_FILE
 from geoloc import Location, get_location
@@ -34,9 +36,16 @@ def main() -> int:
 
     saved = save_forecast(loc.city, daily)
 
+    today = datetime.now(tz=timezone.utc).date()
+    period_end = today + timedelta(days=3)
+
     all_rows = (
         session.query(Weather)
-        .filter(Weather.city == loc.city)
+        .filter(
+            Weather.city == loc.city,
+            Weather.forecast_date >= today,
+            Weather.forecast_date <= period_end,
+        )
         .order_by(Weather.forecast_date)
         .all()
     )
@@ -44,8 +53,15 @@ def main() -> int:
     write_markdown(loc.city, all_rows)
 
     period_start = all_rows[0].forecast_date if all_rows else "—"
-    period_end = all_rows[-1].forecast_date if all_rows else "—"
-    print_summary(loc, period_start, period_end, len(saved), OUTPUT_FILE)
+    actual_period_end = all_rows[-1].forecast_date if all_rows else "—"
+
+    print_summary(
+        loc,
+        period_start,
+        actual_period_end,
+        len(saved),
+        OUTPUT_FILE,
+    )
 
     return 0
 
