@@ -1,0 +1,435 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1,T2A]{fontenc}
+\usepackage[a4paper, top=20mm, bottom=20mm, left=20mm, right=13mm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{cmap}
+\usepackage[russian, english]{babel}
+\usepackage{textcomp}
+\usepackage{indentfirst}
+\usepackage{rotating, graphicx}
+\usepackage{mwe}
+\usepackage{wrapfig}
+\usepackage{hyperref}
+\usepackage{caption}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{makecell}
+\usepackage{listings}
+\usepackage{fancyvrb}
+\usepackage{amsmath}
+\usepackage{xcolor}
+
+% ======================= listings: настройка =======================
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny,
+    showstringspaces=false,
+    captionpos=b,
+    extendedchars=true,
+    inputencoding=utf8,
+    language=Python,
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!60!black},
+    stringstyle=\color{red!70!black},
+    tabsize=4,
+    columns=flexible,
+    literate=
+    {а}{{\cyra}}1 {б}{{\cyrb}}1 {в}{{\cyrv}}1 {г}{{\cyrg}}1
+    {д}{{\cyrd}}1 {е}{{\cyre}}1 {ё}{{\cyryo}}1 {ж}{{\cyrzh}}1
+    {з}{{\cyrz}}1 {и}{{\cyri}}1 {й}{{\cyrishrt}}1 {к}{{\cyrk}}1
+    {л}{{\cyrl}}1 {м}{{\cyrm}}1 {н}{{\cyrn}}1 {о}{{\cyro}}1
+    {п}{{\cyrp}}1 {р}{{\cyrr}}1 {с}{{\cyrs}}1 {т}{{\cyrt}}1
+    {у}{{\cyru}}1 {ф}{{\cyrf}}1 {х}{{\cyrh}}1 {ц}{{\cyrc}}1
+    {ч}{{\cyrch}}1 {ш}{{\cyrsh}}1 {щ}{{\cyrshch}}1 {ъ}{{\cyrhrdsn}}1
+    {ы}{{\cyrery}}1 {ь}{{\cyrsftsn}}1 {э}{{\cyrerev}}1 {ю}{{\cyryu}}1
+    {я}{{\cyrya}}1
+    {А}{{\CYRA}}1 {Б}{{\CYRB}}1 {В}{{\CYRV}}1 {Г}{{\CYRG}}1
+    {Д}{{\CYRD}}1 {Е}{{\CYRE}}1 {Ё}{{\CYRYO}}1 {Ж}{{\CYRZH}}1
+    {З}{{\CYRZ}}1 {И}{{\CYRI}}1 {Й}{{\CYRISHRT}}1 {К}{{\CYRK}}1
+    {Л}{{\CYRL}}1 {М}{{\CYRM}}1 {Н}{{\CYRN}}1 {О}{{\CYRO}}1
+    {П}{{\CYRP}}1 {Р}{{\CYRR}}1 {С}{{\CYRS}}1 {Т}{{\CYRT}}1
+    {У}{{\CYRU}}1 {Ф}{{\CYRF}}1 {Х}{{\CYRH}}1 {Ц}{{\CYRC}}1
+    {Ч}{{\CYRCH}}1 {Ш}{{\CYRSH}}1 {Щ}{{\CYRSHCH}}1 {Ъ}{{\CYRHRDSN}}1
+    {Ы}{{\CYRERY}}1 {Ь}{{\CYRSFTSN}}1 {Э}{{\CYREREV}}1 {Ю}{{\CYRYU}}1
+    {Я}{{\CYRYA}}1
+}
+
+\newcounter{imgcnt}
+\setcounter{imgcnt}{1}
+\newcounter{codecnt}
+\setcounter{codecnt}{1}
+
+\begin{document}
+\sloppy                            % <-- убирает Overfull \hbox
+\emergencystretch=1em
+\setlength{\footskip}{10mm}
+
+% ==================== ТИТУЛЬНЫЙ ЛИСТ ====================
+\newpage\thispagestyle{plain}
+\thispagestyle{empty}
+\begin{center}
+\textbf{МИНИСТЕРСТВО НАУКИ И ВЫСШЕГО ОБРАЗОВАНИЯ\\
+РОССИЙСКОЙ ФЕДЕРАЦИИ\\[2ex]
+\mbox{ФЕДЕРАЛЬНОЕ ГОСУДАРСТВЕННОЕ БЮДЖЕТНОЕ ОБРАЗОВАТЕЛЬНОЕ}\\
+УЧРЕЖДЕНИЕ ВЫСШЕГО ОБРАЗОВАНИЯ\\
+«ВЯТСКИЙ ГОСУДАРСТВЕННЫЙ УНИВЕРСИТЕТ»\\[2ex]
+Институт математики и информационных систем\\[2ex]
+Факультет автоматики и вычислительной техники\\[2ex]
+Кафедра электронных вычислительных машин}
+\end{center}
+\vspace{35mm}
+
+\begin{center}
+Отчёт по проекту\\
+<<Weather Forecast>>\\
+по дисциплине\\
+<<Программирование>>\\[1ex]
+\end{center}
+\vspace{45mm}
+\begin{flushleft}
+Выполнил студент гр. ИВТб-3302-05-00 \hspace{42mm} \rule[-0,5mm]{30mm}{0.15mm}\,/Иванов И.И./\\
+\mbox{\tiny\hspace{124mm}(Подпись)}\\[1ex]
+Проверил профессор кафедры ЭВМ \hspace{45mm} \rule[-0,5mm]{30mm}{0.15mm}\,/Петров П.П./\\
+\mbox{\tiny\hspace{122mm}(Подпись)}
+\end{flushleft}
+\vfill
+\begin{center}
+Киров\\
+2026
+\end{center}
+
+% ==================== ОСНОВНАЯ ЧАСТЬ ====================
+\newpage
+\topmargin = -35pt
+
+\section*{\normalsize Цель работы}
+
+Разработать приложение для автоматического получения прогноза погоды, сохранения его в базе данных и формирования Markdown-отчёта.
+
+\section*{\normalsize Задание}
+
+Изучить и описать архитектуру приложения \texttt{Weather Forecast}, реализованного на языке Python. Приложение должно:
+\begin{itemize}
+    \item определять текущую локацию пользователя по IP-адресу;
+    \item запрашивать прогноз погоды на 4 дня через OpenWeatherMap API;
+    \item агрегировать 3-часовые данные в дневные записи;
+    \item сохранять данные в SQLite без дубликатов;
+    \item формировать отчёт в формате Markdown;
+    \item выводить сводку в консоль.
+\end{itemize}
+
+\section*{\normalsize Теоретические сведения}
+
+В проекте используются следующие технологии и библиотеки:
+\begin{itemize}
+    \item \textbf{Python 3.10+} --- язык программирования, поддерживающий современные конструкции (аннотации типов, \texttt{dataclasses}).
+    \item \textbf{SQLAlchemy 2.0} --- ORM для работы с базой данных SQLite. Позволяет описывать модели как классы Python и выполнять запросы через сессии.
+    \item \textbf{requests} --- библиотека для выполнения HTTP-запросов к внешним API.
+    \item \textbf{python-dotenv} --- загрузка переменных окружения из файла \texttt{.env}.
+    \item \textbf{OpenWeatherMap API} --- внешний сервис для получения прогноза погоды. Используется endpoint \texttt{/data/2.5/forecast}, возвращающий данные с шагом 3 часа.
+    \item \textbf{IP-геолокация} --- сервис \texttt{ip-api.com} для определения города и координат по IP-адресу.
+    \item \textbf{Markdown} --- текстовый формат для формирования отчёта.
+\end{itemize}
+
+\section*{\normalsize Ход работы}
+
+\subsection*{Архитектура приложения}
+
+Приложение состоит из нескольких модулей, каждый из которых отвечает за свою часть функциональности:
+\begin{itemize}
+    \item \texttt{env\_manager.py} --- загрузка и валидация переменных окружения, настройка логирования.
+    \item \texttt{geoloc.py} --- определение локации (IP-геолокация или фолбэк по городу).
+    \item \texttt{weather\_api.py} --- запрос прогноза и агрегация данных по дням.
+    \item \texttt{db\_manager.py} --- подключение к БД, модель \texttt{Weather}, сохранение записей.
+    \item \texttt{report.py} --- формирование Markdown-отчёта.
+    \item \texttt{main.py} --- точка входа, управляющая последовательностью вызовов.
+\end{itemize}
+
+Взаимодействие модулей можно описать следующей схемой:
+\begin{center}
+\texttt{main} $\rightarrow$ \texttt{geoloc} $\rightarrow$ \texttt{weather\_api} $\rightarrow$ \texttt{db\_manager} $\rightarrow$ \texttt{report}
+\end{center}
+
+\subsection*{Модуль env\_manager.py}
+
+Модуль загружает переменные из \texttt{.env} с помощью \texttt{python-dotenv} и предоставляет их остальным частям программы. Обязательные переменные проверяются функцией \texttt{\_require}. Также настраивается базовое логирование.
+
+\begin{lstlisting}[caption={Фрагмент env\_manager.py}, label={lst:env}]
+import logging
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+LEVEL = os.getenv("LOG_LEVEL", "WARNING").upper()
+logging.basicConfig(level=LEVEL,
+                    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
+log = logging.getLogger(__name__)
+
+def _require(name: str) -> str:
+    v = os.getenv(name)
+    if v is None:
+        raise RuntimeError(f"{name} is not set")
+    return v
+
+DB_URL: str = _require("DB_URL")
+DB_USER: str = os.getenv("DB_USER", "")
+DB_PASSWORD: str = os.getenv("DB_PASSWORD", "")
+WEATHER_API_KEY: str = _require("WEATHER_API_KEY")
+WEATHER_API_URL: str = _require("WEATHER_API_BASE_URL")
+GEO_API_URL: str | None = os.getenv("GEO_API_URL")
+GEO_API_FALLBACK_CITY: str | None = os.getenv("GEO_API_FALLBACK_CITY")
+OUTPUT_FILE: str = os.getenv("OUTPUT_FILE", "weather_report.md")
+\end{lstlisting}
+
+\subsection*{Модуль geoloc.py}
+
+Определяет локацию пользователя. Если задан \texttt{GEO\_API\_URL}, выполняется запрос к сервису IP-геолокации. При успехе возвращается объект \texttt{Location} с городом и координатами. В случае ошибки или отсутствия URL используется запасной город из \texttt{GEO\_API\_FALLBACK\_CITY}.
+
+\begin{lstlisting}[caption={Функция get\_location в geoloc.py}, label={lst:geo}]
+@dataclass
+class Location:
+    city: str
+    lat: float | None = None
+    lon: float | None = None
+
+def get_location() -> Location:
+    if GEO_API_URL:
+        try:
+            r = requests.get(GEO_API_URL, timeout=5)
+            r.raise_for_status()
+            data = r.json()
+            city = data.get("city")
+            lat = data.get("lat") or data.get("latitude")
+            lon = data.get("lon") or data.get("longitude")
+            if city and lat is not None and lon is not None:
+                return Location(city, float(lat), float(lon))
+        except requests.RequestException as e:
+            log.warning("Request to %s failed: %s", GEO_API_URL, e)
+        except ValueError as e:
+            log.warning("JSON parse error: %s", e)
+    if GEO_API_FALLBACK_CITY:
+        return Location(GEO_API_FALLBACK_CITY)
+    raise RuntimeError("Could not determine city.")
+\end{lstlisting}
+
+\subsection*{Модуль weather\_api.py}
+
+Содержит две основные функции: \texttt{fetch\_forecast} для запроса к OpenWeatherMap и \texttt{aggregate\_daily} для агрегации 3-часовых данных в дневные.
+
+\begin{lstlisting}[caption={Функции fetch\_forecast и aggregate\_daily}, label={lst:weather}]
+def fetch_forecast(loc: Location) -> list[dict]:
+    params = {"appid": WEATHER_API_KEY, "units": "metric", "lang": "ru"}
+    if loc.lat is not None and loc.lon is not None:
+        params["lat"] = loc.lat
+        params["lon"] = loc.lon
+    else:
+        params["q"] = loc.city
+    r = requests.get(f"{WEATHER_API_URL}/forecast", params=params, timeout=10)
+    if r.status_code == 404:
+        raise RuntimeError(f"City not found: {loc.city}")
+    r.raise_for_status()
+    return r.json()["list"]
+
+def aggregate_daily(items: list[dict], days: int = 4) -> list[dict]:
+    by_day = defaultdict(list)
+    for item in items:
+        d = datetime.fromisoformat(item["dt_txt"]).date()
+        by_day[d].append(item)
+    today = datetime.now(tz=timezone.utc).date()
+    result = []
+    for d in sorted(by_day):
+        if d < today:
+            continue
+        if len(result) >= days:
+            break
+        entries = by_day[d]
+        temps_min = [e["main"]["temp_min"] for e in entries]
+        temps_max = [e["main"]["temp_max"] for e in entries]
+        humidity = [e["main"]["humidity"] for e in entries]
+        wind = [e["wind"]["speed"] for e in entries]
+        descriptions = [e["weather"][0]["description"] for e in entries]
+        result.append({
+            "date": d,
+            "temp_min": min(temps_min),
+            "temp_max": max(temps_max),
+            "humidity": int(sum(humidity) / len(humidity)),
+            "wind_speed": max(wind),
+            "description": max(set(descriptions), key=descriptions.count),
+        })
+    return result
+\end{lstlisting}
+
+\subsection*{Модуль db\_manager.py}
+
+Отвечает за подключение к базе данных, описание модели \texttt{Weather} и сохранение записей. Используется уникальное ограничение по паре \texttt{(city, forecast\_date)}, чтобы избежать дублирования.
+
+\begin{lstlisting}[caption={Модель Weather и функция save\_forecast}, label={lst:db}]
+class Weather(Base):
+    __tablename__ = "weather_forecast"
+    __table_args__ = (
+        UniqueConstraint("city", "forecast_date", name="uq_city_forecast_date"),
+    )
+    id = Column(Integer, primary_key=True)
+    city = Column(String(100), nullable=False)
+    forecast_date = Column(Date, nullable=False)
+    temp_min = Column(Float)
+    temp_max = Column(Float)
+    humidity = Column(Integer)
+    wind_speed = Column(Float)
+    description = Column(String(100))
+    created_at = Column(DateTime)
+
+def save_forecast(city: str, rows: list[dict]) -> list[Weather]:
+    existing = {d for (d,) in session.query(Weather.forecast_date)
+                .filter(Weather.city == city).all()}
+    saved = []
+    for row in rows:
+        if row["date"] in existing:
+            continue
+        w = Weather(city=city, forecast_date=row["date"],
+                    temp_min=row["temp_min"], temp_max=row["temp_max"],
+                    humidity=row["humidity"], wind_speed=row["wind_speed"],
+                    description=row["description"],
+                    created_at=datetime.now(tz=timezone.utc))
+        session.add(w)
+        saved.append(w)
+    session.commit()
+    return saved
+\end{lstlisting}
+
+\subsection*{Модуль report.py}
+
+Формирует Markdown-отчёт с выравниванием колонок. Функция \texttt{\_render} создаёт таблицу, а \texttt{write\_markdown} записывает её в файл.
+
+\begin{lstlisting}[caption={Функция \_render в report.py}, label={lst:report}]
+HEADERS = ["Date", "Min T (C)", "Max T (C)", "Description", "Humidity (%)", "Wind (m/s)"]
+
+def _row_from(r) -> list[str]:
+    return [str(r.forecast_date), str(round(r.temp_min)), str(round(r.temp_max)),
+            r.description.capitalize(), str(r.humidity), str(round(r.wind_speed))]
+
+def _render(city: str, rows: list) -> str:
+    if not rows:
+        return f"# Weather forecast\n\nLocation: {city}\n\nNo data.\n"
+    body = [_row_from(r) for r in rows]
+    widths = [len(h) for h in HEADERS]
+    for row in body:
+        for i, cell in enumerate(row):
+            widths[i] = max(widths[i], len(cell))
+    def line(cells):
+        return "| " + " | ".join(c.ljust(widths[i])
+                                 for i, c in enumerate(cells)) + " |"
+    separator = "|" + "|".join("-" * (w + 2) for w in widths) + "|"
+    period = f"{rows[0].forecast_date} - {rows[-1].forecast_date}"
+    out = ["# Weather forecast", f"Location: {city}",
+           f"Period: {period}", "", line(HEADERS), separator]
+    out.extend(line(row) for row in body)
+    return "\n".join(out) + "\n"
+\end{lstlisting}
+
+\subsection*{Главный модуль main.py}
+
+Управляет последовательностью действий: определение локации, запрос прогноза, агрегация, сохранение, выборка из БД, формирование отчёта и вывод сводки.
+
+\begin{lstlisting}[caption={Функция main в main.py}, label={lst:main}]
+def main() -> int:
+    loc = get_location()
+    raw = fetch_forecast(loc)
+    daily = aggregate_daily(raw, days=4)
+    saved = save_forecast(loc.city, daily)
+    today = datetime.now(tz=timezone.utc).date()
+    period_end = today + timedelta(days=3)
+    all_rows = session.query(Weather).filter(
+        Weather.city == loc.city,
+        Weather.forecast_date >= today,
+        Weather.forecast_date <= period_end
+    ).order_by(Weather.forecast_date).all()
+    write_markdown(loc.city, all_rows)
+    period_start = all_rows[0].forecast_date if all_rows else "-"
+    actual_period_end = all_rows[-1].forecast_date if all_rows else "-"
+    print_summary(loc, period_start, actual_period_end, len(saved), OUTPUT_FILE)
+    return 0
+\end{lstlisting}
+
+\subsection*{Настройка и запуск}
+
+Для работы приложения необходимо создать файл \texttt{.env} на основе \texttt{.env.example} и заполнить его. Основные переменные приведены в таблице~\ref{tab:env}.
+
+\begin{table}[!ht]
+\centering
+\captionsetup{justification=raggedleft,singlelinecheck=false}
+\caption*{Таблица 1}
+\captionsetup{justification=centering,singlelinecheck=false}
+\caption*{Переменные окружения}
+\label{tab:env}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{|>{\ttfamily}p{0.35\textwidth}|>{\raggedright\arraybackslash}p{0.55\textwidth}|}
+\hline
+\textbf{Переменная} & \textbf{Описание}\\
+\hline
+DB\_URL & URL базы данных (например, sqlite:///./weather.db)\\
+\hline
+DB\_USER & Имя пользователя БД (для SQLite пусто)\\
+\hline
+DB\_PASSWORD & Пароль БД (для SQLite пусто)\\
+\hline
+WEATHER\_API\_KEY & API-ключ OpenWeatherMap (обязателен)\\
+\hline
+WEATHER\_API\_BASE\_URL & Базовый URL API (https://api.openweathermap.org/data/2.5)\\
+\hline
+GEO\_API\_URL & URL сервиса IP-геолокации (https://ip-api.com/json/)\\
+\hline
+GEO\_API\_FALLBACK\_CITY & Запасной город, если IP-геолокация не сработала\\
+\hline
+LOG\_LEVEL & Уровень логирования (DEBUG, INFO, WARNING, ERROR, CRITICAL)\\
+\hline
+OUTPUT\_FILE & Путь к Markdown-файлу отчёта\\
+\hline
+\end{tabular}
+\end{table}
+
+Зависимости проекта перечислены в \texttt{requirements.txt}:
+\begin{itemize}
+    \item requests 2.34.2
+    \item SQLAlchemy 2.0.54
+    \item python-dotenv 1.2.3
+\end{itemize}
+
+Запуск производится командой \texttt{python src/main.py} или через скрипт \texttt{run.sh}.
+
+\subsection*{Пример вывода}
+
+Пример Markdown-отчёта:
+\begin{verbatim}
+# Weather forecast
+Location: Kirov
+Period: 2026-09-28 - 2026-10-01
+
+| Date       | Min T (C) | Max T (C) | Description | Humidity (%) | Wind (m/s) |
+|------------|-----------|-----------|-------------|--------------|------------|
+| 2026-09-28 | 8         | 9         | Clear       | 91           | 2          |
+| 2026-09-29 | 5         | 16        | Clear       | 77           | 3          |
+| 2026-09-30 | 4         | 16        | Clear       | 78           | 2          |
+| 2026-10-01 | 6         | 15        | Cloudy      | 77           | 3          |
+\end{verbatim}
+
+Пример консольной сводки:
+\begin{verbatim}
+==================================================
+  City:              Frankfurt am Main
+  Coordinates:       50.0827, 8.6297
+  Forecast period:   2026-09-28 - 2026-10-01
+  Saved records:     0
+  Report file:       weather_report.md
+==================================================
+\end{verbatim}
+
+\section*{\normalsize Вывод}
+
+В ходе выполнения проекта разработано приложение \texttt{Weather Forecast}, демонстрирующее модульный подход к построению программ на Python. Освоены работа с внешними API (OpenWeatherMap, ip-api.com), ORM SQLAlchemy для взаимодействия с SQLite, обработка ошибок и логирование, а также формирование отчётов в формате Markdown. Приложение успешно решает задачу автоматического получения и сохранения прогноза погоды.
+
+\end{document}

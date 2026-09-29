@@ -3,4 +3,7 @@
 *.db
 *report.md
 output.md
+main.out
+main.aux
+main.log
 **/__pycache__/
